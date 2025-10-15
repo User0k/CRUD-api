@@ -6,3 +6,6 @@ export type User = {
   age: number;
   hobbies: string[];
 };
+
+export type PathType = { type: 'base' } | { type: 'id'; id: string };
+// export type HTTPMethods = 'GET' | 'PUT' | 'POST' | 'DELETE';

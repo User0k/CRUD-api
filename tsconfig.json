@@ -3,7 +3,6 @@
     "target": "esnext",
     "module": "nodenext",
     "rewriteRelativeImportExtensions": true,
-    "erasableSyntaxOnly": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
