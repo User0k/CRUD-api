@@ -4,7 +4,9 @@
   "description": "simple CRUD API using in-memory database underneath",
   "main": "src/index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start:dev": "ts-node-dev src/index.ts",
+    "start:prod": "tsc && node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +25,8 @@
   },
   "homepage": "https://github.com/User0k/CRUD-api#readme",
   "dependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
