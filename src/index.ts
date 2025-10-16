@@ -1,6 +1,6 @@
 import { createServer } from 'http';
 
-import { apiGet, apiPost } from './api';
+import { apiGet, apiPost, apiPut } from './api';
 import { jsonStringify } from './utils/jsonStringify';
 import { sanitizeUrl } from './utils/sanitizeUrl';
 import { PORT } from './constants';
@@ -24,6 +24,9 @@ const server = createServer((req, res) => {
       break;
     case HTTPMethod.Post:
       apiPost(req, res);
+      break;
+    case HTTPMethod.Put:
+      apiPut(req, res, route);
       break;
     default:
       res.statusCode = StatusCode.ServerError;
