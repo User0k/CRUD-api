@@ -7,5 +7,7 @@ export type User = {
   hobbies: string[];
 };
 
-export type PathType = { type: 'base' } | { type: 'id'; id: string };
-// export type HTTPMethods = 'GET' | 'PUT' | 'POST' | 'DELETE';
+export type RouteType =
+  | { type: 'base' }
+  | { type: 'none-id' }
+  | { type: 'uuid'; id: string };

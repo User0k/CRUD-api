@@ -1,43 +1,31 @@
 import { createServer } from 'http';
 
-import { DataBase } from './db';
-import { PORT } from './constants';
+import { apiGet } from './api';
+import { jsonStringify } from './utils/jsonStringify';
 import { sanitizeUrl } from './utils/sanitizeUrl';
+import { PORT } from './constants';
 import { HTTPMethod, StatusCode } from './types/enums';
-
-const db = new DataBase();
 
 const server = createServer((req, res) => {
   const { method, url } = req;
-  const path = sanitizeUrl(url);
+  const route = sanitizeUrl(url);
 
-  if (!path) {
+  res.setHeader('Content-Type', 'application/json');
+
+  if (!route) {
     res.statusCode = StatusCode.NotFound;
-    res.end(JSON.stringify({ error: 'Incorrect api url' }));
+    res.end(jsonStringify({ message: 'Incorrect api url' }));
     return;
   }
 
-  if (method === HTTPMethod.Get && path.type === 'base') {
-    res.statusCode = StatusCode.OK;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(db.getAll()));
-    return;
-  }
-
-  if (method === HTTPMethod.Get && path.type === 'id') {
-    const user = db.get(path.id);
-
-    if (user) {
-      res.statusCode = StatusCode.OK;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(user));
-      return;
-    }
-
-    res.statusCode = StatusCode.Invalid;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ message: 'User with this id not found' }));
-    return;
+  switch (method) {
+    case HTTPMethod.Get:
+      apiGet(res, route);
+      break;
+    default:
+      res.statusCode = StatusCode.ServerError;
+      res.end(jsonStringify({ message: 'This method is not supported' }));
+      break;
   }
 });
 

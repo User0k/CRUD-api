@@ -1,12 +1,14 @@
-import { baseUrl } from '../constants';
-import { PathType } from '../types';
+import { validate } from 'uuid';
 
-export function sanitizeUrl(url?: string): PathType | null {
+import { baseUrl } from '../constants';
+import { RouteType } from '../types';
+
+export function sanitizeUrl(url?: string): RouteType | null {
   if (!url || !url.startsWith(baseUrl)) return null;
 
-  const path = url.slice(baseUrl.length);
-  const [, id] = path.split('/');
+  const route = url.slice(baseUrl.length);
+  const [, id] = route.split('/');
 
   if (!id) return { type: 'base' };
-  return { type: 'id', id };
+  return validate(id) ? { type: 'uuid', id } : { type: 'none-id' };
 }
