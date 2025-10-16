@@ -1,7 +1,7 @@
 import { v4 } from 'uuid';
 import { ID, User } from './types';
 
-export class DataBase {
+class DataBase {
   users: Map<ID, User>;
   constructor() {
     this.users = new Map();
@@ -17,20 +17,27 @@ export class DataBase {
 
   add(user: Omit<User, 'id'>) {
     const id = v4();
-    const newUser = { ...user, id };
+    const { age, hobbies, username } = user;
+    const newUser = { id, age, hobbies, username };
     this.users.set(id, newUser);
     return newUser;
   }
 
-  put(id: ID, user: Omit<User, 'id'>) {
-    const newUser = { ...user, id };
+  update(id: ID, user: Omit<User, 'id'>) {
+    const { age, hobbies, username } = user;
+    const newUser = { id, age, hobbies, username };
     this.users.set(id, newUser);
     return newUser;
   }
 
   delete(id: ID) {
     const user = this.get(id);
+
+    if (!user) return null;
+
     this.users.delete(id);
     return user;
   }
 }
+
+export const dbInstance = new DataBase();
