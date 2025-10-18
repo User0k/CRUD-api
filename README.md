@@ -43,7 +43,7 @@ npm run start:prod
 npm run start:multi
 ```
 
-[How load balancer works](https://github.com/User0k/CRUD-api/README.md#how-load-balancer-works)
+[How load balancer works](#how-load-balancer-works)
 
 **Testing**
 
