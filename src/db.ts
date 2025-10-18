@@ -1,8 +1,8 @@
 import { v4 } from 'uuid';
-import { ID, User } from './types';
+import { AppState, ID, User } from './types';
 
 class DataBase {
-  users: Map<ID, User>;
+  users: AppState;
   constructor() {
     this.users = new Map();
   }

@@ -1,59 +1,38 @@
 import cluster from 'node:cluster';
-import { createServer, IncomingMessage, request } from 'node:http';
 import { availableParallelism } from 'node:os';
 import process from 'node:process';
 
 import { apiServer } from '../api';
 import { PORT } from '../constants';
-import { StatusCode } from '../types/enums';
+import {
+  AppState,
+  HandledMessage,
+  InitRequestMessage,
+  MutationMessage,
+} from '../types';
+import { workerDbSync } from './syncDB';
+import { workerCb } from './worker';
+import { setupBalancer } from './balancer';
 
 const numCPUs = availableParallelism();
 
 if (cluster.isPrimary) {
   const workerPorts: number[] = [];
+  const appState: AppState = new Map();
 
   for (let i = 1; i < numCPUs; i++) {
     const worker = cluster.fork({ WORKER_PORT: String(+PORT + i) });
     workerPorts.push(+PORT + i);
 
-    worker.on('message', (message) => {
-      if (message.type === 'handled') {
-        console.log(
-          `Worker on port ${message.port} handled ${message.method} ${message.url}`,
-        );
-      }
-    });
+    worker.on(
+      'message',
+      (message: MutationMessage | InitRequestMessage | HandledMessage) => {
+        workerCb(appState, worker, message);
+      },
+    );
   }
 
-  let currentWorker = 0;
-
-  const balancer = createServer((req, res) => {
-    const targetPort = workerPorts[currentWorker];
-    currentWorker = (currentWorker + 1) % workerPorts.length;
-
-    const options = {
-      hostname: 'localhost',
-      port: targetPort,
-      path: req.url,
-      method: req.method,
-      headers: req.headers,
-    };
-
-    const proxyReq = request(options, (proxyRes: IncomingMessage) => {
-      res.setHeader('Content-Type', 'application/json');
-      res.statusCode = proxyRes.statusCode ?? StatusCode.ServerError;
-      proxyRes.pipe(res, { end: true });
-    });
-
-    proxyReq.on('error', (err) => {
-      res.statusCode = StatusCode.ServerError;
-      res.end(`Bad Gateway: ${err.message}`);
-    });
-
-    req.pipe(proxyReq, { end: true });
-  });
-
-  balancer.listen(PORT, () => {
+  setupBalancer(workerPorts).listen(PORT, () => {
     console.log(`Load balancer ${process.pid} listening on port ${PORT}`);
   });
 } else {
@@ -62,6 +41,8 @@ if (cluster.isPrimary) {
   apiServer.listen(workerPort, () => {
     console.log(`Worker ${process.pid} listening on port ${workerPort}`);
   });
+
+  workerDbSync();
 
   apiServer.on('request', (req) => {
     process.send?.({
