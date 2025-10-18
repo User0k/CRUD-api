@@ -37,11 +37,13 @@ You must see the `Server is running on port YOUR_PORT.` message in terminal when
 npm run start:prod
 ```
 
-**Load Balanced Mode**
+**Load Balancer Mode**
 
 ```bash
 npm run start:multi
 ```
+
+[How load balancer works](https://github.com/User0k/CRUD-api/README.md#how-load-balancer-works)
 
 **Testing**
 
@@ -62,7 +64,7 @@ npm run test
 
 > **_NOTE:_** You don't need to provide the user id (you can but the server will not accept it). Instead its creation depends on the server.
 
-### Endpoints and supported methods
+### Endpoints and Supported Methods
 - **GET** `api/users` is used to get all persons
   - Server answers with `status code` **200** and all users records
 - **GET** `api/users/{userId}`
@@ -112,3 +114,12 @@ JSON '{"username": "Alice", "age": 25, "hobbies": ["reading"]}'
 ```bash
 DELETE http://localhost:4000/api/users/{id}
 ```
+
+## How Load Balancer Works
+
+Load balancer listens for requests on your port (`4000` by default), workers are set on `port + 1` each limited by threads of your system. 
+For example, if you have `12 threads`, you will get 11 workers that start from `4001` to `4011` port. For simplicity, you will get messages from balancer and worker in terminal when they are ready. 
+Workers use *Round-robin algorithm*: each subsequent request is sent to worker on `port + 1` relative to the previous one. If the circle is over (`4011` port is hit in previous response), it starts from the first one (`4001`).
+To examine this behavior you can also see a message from worker with its `port`, `method` and `url`. See the exmaple from my machine:
+
+![load-balancer](https://github.com/user-attachments/assets/d9140aa4-7062-4f06-8c0d-697f30475959)
