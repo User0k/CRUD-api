@@ -1,4 +1,5 @@
-import { User } from '../types';
+import { Product } from '../types';
 
-export const jsonStringify = (data: User | User[] | { message: string }) =>
-  JSON.stringify(data);
+export const jsonStringify = (
+  data: Product | Product[] | { message: string },
+) => JSON.stringify(data);

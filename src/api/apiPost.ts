@@ -2,7 +2,7 @@ import { type IncomingMessage, type ServerResponse } from 'node:http';
 
 import { dbInstance as db } from '../db';
 import { jsonStringify } from '../utils/jsonStringify';
-import { isUser } from '../utils/isUser';
+import { isProduct } from '../utils/isProduct';
 import { StatusCode } from '../types/enums';
 
 export function apiPost(
@@ -19,19 +19,20 @@ export function apiPost(
     try {
       const data = JSON.parse(body);
 
-      if (!isUser(data)) {
+      if (!isProduct(data)) {
         res.statusCode = StatusCode.Invalid;
         res.end(
           jsonStringify({
-            message: 'User should have username, age and hobbies fields',
+            message:
+              'Product should have name, description, price, category, and inStock fields',
           }),
         );
         return;
       }
 
-      const user = db.add(data);
+      const product = db.add(data);
       res.statusCode = StatusCode.Created;
-      res.end(jsonStringify(user));
+      res.end(jsonStringify(product));
     } catch (err: unknown) {
       res.statusCode = StatusCode.ServerError;
       res.end(

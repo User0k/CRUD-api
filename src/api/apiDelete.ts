@@ -15,11 +15,11 @@ export function apiDelete(
     return;
   }
 
-  const user = db.delete(route.id);
+  const product = db.delete(route.id);
 
-  if (!user) {
+  if (!product) {
     res.statusCode = StatusCode.NotFound;
-    res.end(jsonStringify({ message: 'User with this id not found' }));
+    res.end(jsonStringify({ message: 'Product with this id not found' }));
     return;
   }
 

@@ -2,7 +2,7 @@ import { type IncomingMessage, type ServerResponse } from 'node:http';
 
 import { dbInstance as db } from '../db';
 import { jsonStringify } from '../utils/jsonStringify';
-import { isUser } from '../utils/isUser';
+import { isProduct } from '../utils/isProduct';
 import { RouteType } from '../types';
 import { StatusCode } from '../types/enums';
 
@@ -17,11 +17,11 @@ export function apiPut(
     return;
   }
 
-  const user = db.get(route.id);
+  const product = db.get(route.id);
 
-  if (!user) {
+  if (!product) {
     res.statusCode = StatusCode.NotFound;
-    res.end(jsonStringify({ message: 'User with this id not found' }));
+    res.end(jsonStringify({ message: 'Product with this id not found' }));
     return;
   }
 
@@ -35,24 +35,27 @@ export function apiPut(
     try {
       const data = JSON.parse(body);
 
-      if (!isUser(data)) {
+      if (!isProduct(data)) {
         res.statusCode = StatusCode.Invalid;
         res.end(
           jsonStringify({
-            message: 'User should have username, age and hobbies fields',
+            message:
+              'Product should have name, description, price, category, and inStock fields',
           }),
         );
         return;
       }
 
-      db.update(user.id, data);
+      db.update(product.id, data);
       res.statusCode = StatusCode.OK;
       res.end(
         jsonStringify({
-          id: user.id,
-          age: data.age,
-          hobbies: data.hobbies,
-          username: data.username,
+          id: product.id,
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          category: data.category,
+          inStock: data.inStock,
         }),
       );
     } catch (err: unknown) {

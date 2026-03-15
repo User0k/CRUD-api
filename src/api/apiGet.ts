@@ -19,15 +19,15 @@ export function apiGet(res: ServerResponse<IncomingMessage>, route: RouteType) {
   }
 
   if (route.type === 'uuid') {
-    const user = db.get(route.id);
+    const product = db.get(route.id);
 
-    if (user) {
+    if (product) {
       res.statusCode = StatusCode.OK;
-      res.end(jsonStringify(user));
+      res.end(jsonStringify(product));
       return;
     }
 
     res.statusCode = StatusCode.NotFound;
-    res.end(jsonStringify({ message: 'User with this id not found' }));
+    res.end(jsonStringify({ message: 'Product with this id not found' }));
   }
 }
