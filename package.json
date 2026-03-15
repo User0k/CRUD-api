@@ -13,12 +13,6 @@
     "type": "git",
     "url": "git+https://github.com/User0k/CRUD-api.git"
   },
-  "keywords": [
-    "node",
-    "crud",
-    "http",
-    "api"
-  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -27,6 +21,7 @@
   "homepage": "https://github.com/User0k/CRUD-api#readme",
   "dependencies": {
     "dotenv": "^17.2.3",
+    "fastify": "^5.8.2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

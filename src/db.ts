@@ -1,42 +1,42 @@
 import { v4 } from 'uuid';
-import { AppState, ID, User } from './types';
+import { AppState, ID, Product } from './types';
 
 class DataBase {
-  users: AppState;
+  products: AppState;
   constructor() {
-    this.users = new Map();
+    this.products = new Map();
   }
 
   get(id: ID) {
-    return this.users.get(id) ?? null;
+    return this.products.get(id) ?? null;
   }
 
   getAll() {
-    return [...this.users.values()];
+    return [...this.products.values()];
   }
 
-  add(user: Omit<User, 'id'>) {
+  add(product: Omit<Product, 'id'>) {
     const id = v4();
-    const { age, hobbies, username } = user;
-    const newUser = { id, age, hobbies, username };
-    this.users.set(id, newUser);
-    return newUser;
+    const { name, description, price, category, inStock } = product;
+    const newProduct = { id, name, description, price, category, inStock };
+    this.products.set(id, newProduct);
+    return newProduct;
   }
 
-  update(id: ID, user: Omit<User, 'id'>) {
-    const { age, hobbies, username } = user;
-    const newUser = { id, age, hobbies, username };
-    this.users.set(id, newUser);
-    return newUser;
+  update(id: ID, product: Omit<Product, 'id'>) {
+    const { name, description, price, category, inStock } = product;
+    const newProduct = { id, name, description, price, category, inStock };
+    this.products.set(id, newProduct);
+    return newProduct;
   }
 
   delete(id: ID) {
-    const user = this.get(id);
+    const product = this.get(id);
 
-    if (!user) return null;
+    if (!product) return null;
 
-    this.users.delete(id);
-    return user;
+    this.products.delete(id);
+    return product;
   }
 }
 
