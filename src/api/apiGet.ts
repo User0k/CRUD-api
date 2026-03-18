@@ -1,20 +1,21 @@
-import { type IncomingMessage, type ServerResponse } from 'node:http';
-
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { dbInstance as db } from '../db';
-import { jsonStringify } from '../utils/jsonStringify';
 import { RouteType } from '../types';
 import { StatusCode } from '../types/enums';
 
-export function apiGet(res: ServerResponse<IncomingMessage>, route: RouteType) {
-  if (route.type === 'base') {
-    res.statusCode = StatusCode.OK;
-    res.end(jsonStringify(db.getAll()));
-    return;
+export function apiGet(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  route?: RouteType,
+) {
+  if (!route || route.type === 'base') {
+    return db.getAll();
   }
 
   if (route.type === 'none-id') {
-    res.statusCode = StatusCode.Invalid;
-    res.end(jsonStringify({ message: 'No correct UUID provided' }));
+    reply
+      .status(StatusCode.Invalid)
+      .send({ message: 'No correct UUID provided' });
     return;
   }
 
@@ -22,12 +23,12 @@ export function apiGet(res: ServerResponse<IncomingMessage>, route: RouteType) {
     const product = db.get(route.id);
 
     if (product) {
-      res.statusCode = StatusCode.OK;
-      res.end(jsonStringify(product));
-      return;
+      return product;
     }
 
-    res.statusCode = StatusCode.NotFound;
-    res.end(jsonStringify({ message: 'Product with this id not found' }));
+    reply
+      .status(StatusCode.NotFound)
+      .send({ message: 'Product with this id not found' });
+    return;
   }
 }

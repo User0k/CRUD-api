@@ -1,46 +1,20 @@
-import { type IncomingMessage, type ServerResponse } from 'node:http';
-
-import { dbInstance as db } from '../db';
-import { jsonStringify } from '../utils/jsonStringify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { isProduct } from '../utils/isProduct';
 import { StatusCode } from '../types/enums';
+import { dbInstance as db } from '../db';
 
-export function apiPost(
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
-) {
-  let body = '';
+export async function apiPost(request: FastifyRequest, reply: FastifyReply) {
+  const data = request.body;
 
-  req.on('data', (chunk) => {
-    body += chunk.toString();
-  });
+  if (!isProduct(data)) {
+    reply.status(StatusCode.Invalid).send({
+      message:
+        'Product should have name, description, price, category, and inStock fields',
+    });
+    return;
+  }
 
-  req.on('end', () => {
-    try {
-      const data = JSON.parse(body);
-
-      if (!isProduct(data)) {
-        res.statusCode = StatusCode.Invalid;
-        res.end(
-          jsonStringify({
-            message:
-              'Product should have name, description, price, category, and inStock fields',
-          }),
-        );
-        return;
-      }
-
-      const product = db.add(data);
-      res.statusCode = StatusCode.Created;
-      res.end(jsonStringify(product));
-    } catch (err: unknown) {
-      res.statusCode = StatusCode.ServerError;
-      res.end(
-        jsonStringify({
-          message: 'Server cannot handle this request',
-        }),
-      );
-      console.error(err);
-    }
-  });
+  const product = db.add(data);
+  reply.status(StatusCode.Created).send(product);
+  return product;
 }

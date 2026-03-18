@@ -1,50 +1,81 @@
-import { createServer } from 'node:http';
+import fastify from 'fastify';
 
-import { apiDelete } from './apiDelete';
 import { apiGet } from './apiGet';
 import { apiPost } from './apiPost';
+import { apiDelete } from './apiDelete';
 import { apiPut } from './apiPut';
-import { jsonStringify } from '../utils/jsonStringify';
 import { sanitizeUrl } from '../utils/sanitizeUrl';
-import { StatusCode, HTTPMethod } from '../types/enums';
+import { StatusCode } from '../types/enums';
 
-export const apiServer = createServer((req, res) => {
-  try {
-    const { method, url } = req;
-    const route = sanitizeUrl(url);
+const server = fastify({
+  logger: true,
+});
 
-    res.setHeader('Content-Type', 'application/json');
+server.get('/api/products', async (request, reply) => {
+  const route = sanitizeUrl('/api/products');
+  if (!route) {
+    reply.status(StatusCode.NotFound).send({ message: 'Incorrect api url' });
+    return;
+  }
 
-    if (!route) {
-      res.statusCode = StatusCode.NotFound;
-      res.end(jsonStringify({ message: 'Incorrect api url' }));
-      return;
-    }
-
-    switch (method) {
-      case HTTPMethod.Get:
-        apiGet(res, route!);
-        break;
-      case HTTPMethod.Post:
-        apiPost(req, res);
-        break;
-      case HTTPMethod.Put:
-        apiPut(req, res, route!);
-        break;
-      case HTTPMethod.Delete:
-        apiDelete(res, route!);
-        break;
-      default:
-        res.statusCode = StatusCode.NotFound;
-        res.end(jsonStringify({ message: 'This method is not supported' }));
-    }
-  } catch (error) {
-    console.error(error);
-    res.statusCode = StatusCode.ServerError;
-    res.end(
-      jsonStringify({
-        message: 'Internal server error',
-      }),
-    );
+  const products = apiGet(request, reply);
+  if (products !== undefined) {
+    reply.status(StatusCode.OK).send(products);
   }
 });
+
+server.get('/api/products/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const route = sanitizeUrl(`/api/products/${id}`);
+
+  if (!route) {
+    reply.status(StatusCode.NotFound).send({ message: 'Incorrect api url' });
+    return;
+  }
+
+  const product = apiGet(request, reply, route);
+  if (product !== undefined) {
+    reply.status(StatusCode.OK).send(product);
+  }
+});
+
+server.post('/api/products', async (request, reply) => {
+  const route = sanitizeUrl('/api/products');
+  if (!route) {
+    reply.status(StatusCode.NotFound).send({ message: 'Incorrect api url' });
+    return;
+  }
+
+  await apiPost(request, reply);
+});
+
+server.put('/api/products/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const route = sanitizeUrl(`/api/products/${id}`);
+
+  if (!route) {
+    reply.status(StatusCode.NotFound).send({ message: 'Incorrect api url' });
+    return;
+  }
+
+  await apiPut(request, reply, route);
+});
+
+server.delete('/api/products/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const route = sanitizeUrl(`/api/products/${id}`);
+
+  if (!route) {
+    reply.status(StatusCode.NotFound).send({ message: 'Incorrect api url' });
+    return;
+  }
+
+  await apiDelete(reply, route);
+});
+
+server.setNotFoundHandler((request, reply) => {
+  reply.status(StatusCode.NotFound).send({ message: 'Endpoint not found' });
+});
+
+export const apiServer = server;
+export { apiDelete, apiGet, apiPost, apiPut };

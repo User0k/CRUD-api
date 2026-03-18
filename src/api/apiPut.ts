@@ -1,71 +1,42 @@
-import { type IncomingMessage, type ServerResponse } from 'node:http';
-
-import { dbInstance as db } from '../db';
-import { jsonStringify } from '../utils/jsonStringify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { isProduct } from '../utils/isProduct';
 import { RouteType } from '../types';
 import { StatusCode } from '../types/enums';
+import { dbInstance as db } from '../db';
+import { Product } from '../types';
 
-export function apiPut(
-  req: IncomingMessage,
-  res: ServerResponse<IncomingMessage>,
+export async function apiPut(
+  request: FastifyRequest,
+  reply: FastifyReply,
   route: RouteType,
 ) {
   if (route.type === 'base' || route.type === 'none-id') {
-    res.statusCode = StatusCode.Invalid;
-    res.end(jsonStringify({ message: 'No correct UUID provided' }));
+    reply
+      .status(StatusCode.Invalid)
+      .send({ message: 'No correct UUID provided' });
     return;
   }
 
   const product = db.get(route.id);
 
   if (!product) {
-    res.statusCode = StatusCode.NotFound;
-    res.end(jsonStringify({ message: 'Product with this id not found' }));
+    reply
+      .status(StatusCode.NotFound)
+      .send({ message: 'Product with this id not found' });
     return;
   }
 
-  let body = '';
+  const data = request.body as Partial<Product>;
 
-  req.on('data', (chunk) => {
-    body += chunk.toString();
-  });
+  if (!isProduct(data)) {
+    reply.status(StatusCode.Invalid).send({
+      message:
+        'Product should have name, description, price, category, and inStock fields',
+    });
+    return;
+  }
 
-  req.on('end', () => {
-    try {
-      const data = JSON.parse(body);
-
-      if (!isProduct(data)) {
-        res.statusCode = StatusCode.Invalid;
-        res.end(
-          jsonStringify({
-            message:
-              'Product should have name, description, price, category, and inStock fields',
-          }),
-        );
-        return;
-      }
-
-      db.update(product.id, data);
-      res.statusCode = StatusCode.OK;
-      res.end(
-        jsonStringify({
-          id: product.id,
-          name: data.name,
-          description: data.description,
-          price: data.price,
-          category: data.category,
-          inStock: data.inStock,
-        }),
-      );
-    } catch (err: unknown) {
-      res.statusCode = StatusCode.ServerError;
-      res.end(
-        jsonStringify({
-          message: 'Server cannot handle this request',
-        }),
-      );
-      console.error(err);
-    }
-  });
+  const updatedProduct = db.update(product.id, data);
+  reply.status(StatusCode.OK).send(updatedProduct);
+  return updatedProduct;
 }
