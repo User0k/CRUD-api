@@ -11,10 +11,7 @@ export type Product = {
 
 export type AppState = Map<ID, Product>;
 
-export type RouteType =
-  | { type: 'base' }
-  | { type: 'none-id' }
-  | { type: 'uuid'; id: string };
+export type RouteType = { type: 'uuid'; id: string };
 
 export type MutationMessage =
   | {

@@ -8,27 +8,18 @@ export function apiGet(
   reply: FastifyReply,
   route?: RouteType,
 ) {
-  if (!route || route.type === 'base') {
+  if (!route) {
     return db.getAll();
   }
 
-  if (route.type === 'none-id') {
-    reply
-      .status(StatusCode.Invalid)
-      .send({ message: 'No correct UUID provided' });
-    return;
-  }
+  const product = db.get(route.id);
 
-  if (route.type === 'uuid') {
-    const product = db.get(route.id);
-
-    if (product) {
-      return product;
-    }
-
+  if (!product) {
     reply
       .status(StatusCode.NotFound)
       .send({ message: 'Product with this id not found' });
     return;
   }
+
+  return product;
 }

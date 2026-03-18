@@ -4,16 +4,13 @@ import { StatusCode } from '../types/enums';
 import { dbInstance as db } from '../db';
 
 export async function apiDelete(reply: FastifyReply, route: RouteType) {
-  if (route.type === 'base' || route.type === 'none-id') {
-    reply
-      .status(StatusCode.Invalid)
-      .send({ message: 'No correct UUID provided' });
+  if (route.type !== 'uuid') {
+    reply.status(StatusCode.Invalid).send({ message: 'Invalid route type' });
     return;
   }
 
-  const product = db.delete(route.id);
-
-  if (!product) {
+  const deletedProduct = db.delete(route.id);
+  if (!deletedProduct) {
     reply
       .status(StatusCode.NotFound)
       .send({ message: 'Product with this id not found' });
@@ -21,5 +18,4 @@ export async function apiDelete(reply: FastifyReply, route: RouteType) {
   }
 
   reply.status(StatusCode.Deleted).send();
-  return;
 }
