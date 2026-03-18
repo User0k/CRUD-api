@@ -38,13 +38,13 @@ if (cluster.isPrimary) {
 } else {
   const workerPort = Number(process.env.WORKER_PORT);
 
-  apiServer.listen(workerPort, () => {
+  apiServer.listen({ port: workerPort }, () => {
     console.log(`Worker ${process.pid} listening on port ${workerPort}`);
   });
 
   workerDbSync();
 
-  apiServer.on('request', (req) => {
+  apiServer.addHook('onRequest', async (req) => {
     process.send?.({
       type: 'handled',
       url: req.url,

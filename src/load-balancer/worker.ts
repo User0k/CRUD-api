@@ -22,7 +22,7 @@ export const workerCb = (
   if (message.type === 'db-init-request') {
     const snapshot: SnapshotMessage = {
       type: 'db-snapshot',
-      users: [...appState.values()],
+      products: [...appState.values()],
     };
     worker.send(snapshot);
     return;
@@ -30,7 +30,7 @@ export const workerCb = (
 
   if (message.type === 'db-mutation') {
     if (message.operation === 'add' || message.operation === 'update') {
-      appState.set(message.user.id, message.user);
+      appState.set(message.product.id, message.product);
     } else if (message.operation === 'delete') {
       appState.delete(message.id);
     }

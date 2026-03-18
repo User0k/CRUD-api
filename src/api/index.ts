@@ -8,8 +8,18 @@ import { StatusCode } from '../types/enums';
 import { isValidUuid } from '../utils/isValidUuid';
 
 const server = fastify({
-  ignoreTrailingSlash: true,
-  logger: true,
+  routerOptions: {
+    ignoreTrailingSlash: true,
+  },
+});
+
+server.setErrorHandler((error, request, reply) => {
+  server.log.error(error);
+  reply.status(500).send({ message: 'Server got tired. Call back later' });
+});
+
+server.setNotFoundHandler((request, reply) => {
+  reply.status(StatusCode.NotFound).send({ message: 'Endpoint not found' });
 });
 
 server.get('/api/products', async (request, reply) => {
@@ -64,10 +74,6 @@ server.delete('/api/products/:id', async (request, reply) => {
 
   const route = { type: 'uuid' as const, id };
   await apiDelete(reply, route);
-});
-
-server.setNotFoundHandler((request, reply) => {
-  reply.status(StatusCode.NotFound).send({ message: 'Endpoint not found' });
 });
 
 export const apiServer = server;

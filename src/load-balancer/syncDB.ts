@@ -12,9 +12,9 @@ export function workerDbSync() {
 
   process.on('message', (message: MutationMessage | SnapshotMessage) => {
     if (message.type === 'db-snapshot') {
-      db.users.clear();
-      for (const user of message.users) {
-        db.users.set(user.id, user);
+      db.products.clear();
+      for (const product of message.products) {
+        db.products.set(product.id, product);
       }
       return;
     }
@@ -22,9 +22,9 @@ export function workerDbSync() {
     if (message.type === 'db-mutation') {
       if (message.originPid === process.pid) return;
       if (message.operation === 'add' || message.operation === 'update') {
-        db.users.set(message.user.id, message.user);
+        db.products.set(message.product.id, message.product);
       } else if (message.operation === 'delete') {
-        db.users.delete(message.id);
+        db.products.delete(message.id);
       }
     }
   });
