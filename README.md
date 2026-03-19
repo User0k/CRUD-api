@@ -51,68 +51,71 @@ npm run start:multi
 npm run test
 ```
 
-### User Model
+### Product Model
 
 ```json
 {
   "id": "uuid",
-  "username": "string",
-  "age": "number",
-  "hobbies": ["string"]
+  "name": "string",
+  "description": "string",
+  "price": number,
+  "category": "string",
+  "inStock": boolean
 }
 ```
 
-> **_NOTE:_** You don't need to provide the user id (you can but the server will not accept it). Instead its creation depends on the server.
+> **_NOTE:_** You don't need to provide the product id. Instead its creation depends on the server.
 
 ### Endpoints and Supported Methods
-- **GET** `api/users` is used to get all persons
-  - Server answers with `status code` **200** and all users records
-- **GET** `api/users/{userId}`
-  - Server answers with `status code` **200** and record if user with this id is found
-  - Server answers with `status code` **400** and *No correct UUID provided* message if `userId` is invalid
-  - Server answers with `status code` **404** and *User with this id not found* message if record with `id === userId` doesn't exist
-- **POST** `api/users` is used to create record about new user and store it in database
+
+- **GET** `/api/products` is used to get all products
+  - Server answers with `status code` **200** and all products records
+- **GET** `/api/products/{productId}`
+  - Server answers with `status code` **200** and record if product with this id is found
+  - Server answers with `status code` **400** and _No correct UUID provided_ message if `productId` is invalid
+  - Server answers with `status code` **404** and _Product with this id not found_ message if record with `id === productId` doesn't exist
+- **POST** `/api/products` is used to create record about new product and store it in database
   - Server answers with `status code` **201** and newly created record
-  - Server answers with `status code` **400** and *User should have username, age and hobbies fields* message if request `body` does not contain **required** fields
-- **PUT** `api/users/{userId}` is used to update existing user
+  - Server answers with `status code` **400** and specific validation messages (e.g., _Name must be a string_, _Price must be greater than 0_, etc.)
+- **PUT** `/api/products/{productId}` is used to update existing product
   - Server answers with `status code` **200** and updated record
-  - Server answers with `status code` **400** and *No correct UUID provided* message if `userId` is invalid
-  - Server answers with `status code` **404** and *User with this id not found* message if record with `id === userId` doesn't exist
-- **DELETE** `api/users/{userId}` is used to delete existing user from database
+  - Server answers with `status code` **400** and _No correct UUID provided_ message if `productId` is invalid
+  - Server answers with `status code` **404** and _Product with this id not found_ message if record with `id === productId` doesn't exist
+- **DELETE** `/api/products/{productId}` is used to delete existing product from database
   - Server answers with `status code` **204** if the record is found and deleted
-  - Server answers with `status code` **400** and *No correct UUID provided* message if `userId` is invalid
-  - Server answers with `status code` **404** and *User with this id not found* message if record with `id === userId` doesn't exist
-- **Any Incorrect** method or not supported enpoint
-  -  Server answers with `status code` **404**
+  - Server answers with `status code` **400** and _No correct UUID provided_ message if `productId` is invalid
+  - Server answers with `status code` **404** and _Product with this id not found_ message if record with `id === productId` doesn't exist
+- **Any Incorrect** method or not supported endpoint
+  - Server answers with `status code` **404** and helpful hints about available endpoints
 - **Server error**
-  - Server answers with `status code` **500**  and message *Internal server error*
+  - Server answers with `status code` **500** and message _Internal server error_
 
 ## Usage Example
 
-**Get All Users:**
+**Get All Products:**
 
 ```bash
-GET http://localhost:4000/api/users
+GET http://localhost:4000/api/products
 ```
 
-**Create User:**
+**Create Product:**
 
 ```bash
-POST http://localhost:4000/api/users \
-JSON '{"username": "John", "age": 30, "hobbies": ["coding", "gaming"]}'
+POST http://localhost:4000/api/products \
+JSON '{"name": "Laptop", "description": "Gaming laptop", "price": 1299.99, "category": "Electronics", "inStock": true}'
 ```
 
-**Update User:**
+**Update Product:**
 
 ```bash
-PUT http://localhost:4000/api/users/{id} \
-JSON '{"username": "Alice", "age": 25, "hobbies": ["reading"]}'
+PUT http://localhost:4000/api/products/{id} \
+JSON '{"name": "Gaming Laptop", "description": "Gaming laptop", "price": 1499.99, "category": "Electronics", "inStock": true}'
 ```
 
-**Delete User:**
+**Delete Product:**
 
 ```bash
-DELETE http://localhost:4000/api/users/{id}
+DELETE http://localhost:4000/api/products/{id}
 ```
 
 ## How Load Balancer Works
@@ -122,4 +125,5 @@ For example, if you have `12 threads`, you will get 11 workers that start from `
 Workers use *Round-robin algorithm*: each subsequent request is sent to worker on `port + 1` relative to the previous one. If the circle is over (`4011` port is hit in previous response), it starts from the first one (`4001`).
 To examine this behavior you can also see a message from worker with its `port`, `method` and `url`. See the exmaple from my machine:
 
-![load-balancer](https://github.com/user-attachments/assets/d9140aa4-7062-4f06-8c0d-697f30475959)
+![load-balancer](https://github.com/user-attachments/assets/8121d334-a3b7-4ba9-a501-4086c8b06622)
+
