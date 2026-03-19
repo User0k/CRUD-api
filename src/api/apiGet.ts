@@ -9,7 +9,9 @@ export function apiGet(
   route?: RouteType,
 ) {
   if (!route) {
-    return db.getAll();
+    const products = db.getAll();
+    reply.status(StatusCode.OK).send(products);
+    return products;
   }
 
   const product = db.get(route.id);
@@ -21,5 +23,6 @@ export function apiGet(
     return;
   }
 
+  reply.status(StatusCode.OK).send(product);
   return product;
 }

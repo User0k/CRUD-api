@@ -9,9 +9,6 @@ const config: Config = {
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
-  moduleNameMapper: {
-    '^uuid$': 'uuid',
-  },
 };
 
 export default config;
